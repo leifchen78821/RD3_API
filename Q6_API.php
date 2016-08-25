@@ -11,14 +11,14 @@ $nameAPI = explode("?",$urlback[4]);
 /**
  * 建立帳號
  */
-if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
+if ($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
     // 判斷有無重複帳號
     $sql = "SELECT `userName` FROM `userName`";
     $prepare = $db->prepare($sql);
     $prepare->execute();
     $result = $prepare->fetchALL(PDO::FETCH_ASSOC);
     foreach($result as $list) {
-        if($_GET["userName"] == $list["userName"]) {
+        if ($_GET["userName"] == $list["userName"]) {
             $message = array("userName" => $_GET["userName"], "errorMessage" => "Repeat Account!!");
             echo json_encode($message);
             exit;
@@ -58,14 +58,14 @@ if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
 /**
  * 查詢餘額(A平台)
  */
-} elseif($nameAPI[0] == "checkBalanceA" && isset($_GET["userName"])) {
+} elseif ($nameAPI[0] == "checkBalanceA" && isset($_GET["userName"])) {
     $sql = "SELECT `moneyInPlatformA` FROM `transferPlatformA` WHERE `userName` = :userName ORDER BY `aID` DESC";
     $prepare = $db->prepare($sql);
     $prepare->bindParam(':userName', $_GET["userName"]);
     $prepare->execute();
     $result = $prepare->fetchALL(PDO::FETCH_ASSOC);
 
-    if($result[0]["moneyInPlatformB"] != NULL) {
+    if ($result[0]["moneyInPlatformA"] != NULL) {
         $message = array("userName" => $_GET["userName"], "BalanceInPlatformA" => $result[0]["moneyInPlatformA"]);
         echo json_encode($message);
         exit;
@@ -78,14 +78,14 @@ if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
 /**
  * 查詢餘額(B平台)
  */
-} elseif($nameAPI[0] == "checkBalanceB" && isset($_GET["userName"])) {
+} elseif ($nameAPI[0] == "checkBalanceB" && isset($_GET["userName"])) {
     $sql = "SELECT `moneyInPlatformB` FROM `transferPlatformB` WHERE `userName` = :userName ORDER BY `bID` DESC";
     $prepare = $db->prepare($sql);
     $prepare->bindParam(':userName', $_GET["userName"]);
     $prepare->execute();
     $result = $prepare->fetchALL(PDO::FETCH_ASSOC);
 
-    if($result[0]["moneyInPlatformB"] != NULL) {
+    if ($result[0]["moneyInPlatformB"] != NULL) {
         $message = array("userName" => $_GET["userName"], "BalanceInPlatformB" => $result[0]["moneyInPlatformB"]);
         echo json_encode($message);
         exit;
@@ -98,7 +98,7 @@ if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
 /**
  * 檢查轉帳狀態
  */
-} elseif($nameAPI[0] == "checkTransfer" && isset($_GET["userName"]) && isset($_GET["transactionId"])) {
+} elseif ($nameAPI[0] == "checkTransfer" && isset($_GET["userName"]) && isset($_GET["transactionId"])) {
     $sql = "SELECT `transactionId` FROM `transferPlatformA` WHERE `userName` = :userName";
     $prepare = $db->prepare($sql);
     $prepare->bindParam(':userName', $_GET["userName"]);
@@ -113,7 +113,7 @@ if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
     $result = $prepare->fetchALL(PDO::FETCH_ASSOC);
     $transactionResultFormPlatformB = $result[0]["transactionId"];
 
-    if($transactionResultFormPlatformA != NULL & $transactionResultFormPlatformB != NULL) {
+    if($transactionResultFormPlatformA != NULL && $transactionResultFormPlatformB != NULL) {
         $message = array("userName" => $_GET["userName"], "transactionId" => $_GET["transactionId"], "message" => "transfer success!!");
         echo json_encode($message);
         exit;
@@ -126,7 +126,7 @@ if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
 /**
  * 轉帳(A平台)
  */
-} elseif($nameAPI[0] == "transferFromA" && isset($_GET["userName"]) && isset($_GET["transactionId"]) && isset($_GET["action"]) && isset($_GET["money"])) {
+} elseif ($nameAPI[0] == "transferFromA" && isset($_GET["userName"]) && isset($_GET["transactionId"]) && isset($_GET["action"]) && isset($_GET["money"])) {
     // 檢查有無此帳號
     $checkuserName = 0;
     $sql = "SELECT `userName` FROM `userName`";
@@ -328,30 +328,8 @@ if($nameAPI[0] == "createMember" && isset($_GET["userName"])) {
     }
 
 } else {
-    echo "本API使用規則:<br><br>";
-    echo "API位址:<br>https://test20160620-leif-chen.c9users.io/_testAPI/Q6/Q6_API.php/API名稱?參數=值<br>";
-    echo "ex.建立帳號:<br>https://test20160620-leif-chen.c9users.io/_testAPI/Q6/Q6_API.php/createMember?userName=LeifChen<br><br>";
-    echo "1.建立帳號<br><br>";
-    echo "API名稱:createMember<br>";
-    echo "參數1:userName(帳號) = (varchar)<br>";
-    echo "p.s.帳號建立後，自動在A平台新增100,000，B平台新增0，交易序號為0<br>";
-    echo "<br>";
-    echo "2.查詢餘額<br><br>";
-    echo "A平台API名稱:checkBalanceA<br>";
-    echo "B平台API名稱:checkBalanceB<br>";
-    echo "參數1:userName(帳號) = (varchar)<br>";
-    echo "<br>";
-    echo "3.檢查轉帳狀態<br><br>";
-    echo "API名稱:checkTransfer<br>";
-    echo "參數1:userName(帳號) = (varchar)<br>";
-    echo "參數2:transactionId(交易序號) = (int)<br>";
-    echo "<br>";
-    echo "4.轉帳<br><br>";
-    echo "A平台轉帳API名稱:transferFromA<br>";
-    echo "B平台轉帳API名稱:transferFromB<br>";
-    echo "參數1:userName(帳號) = (varchar)<br>";
-    echo "參數2:transactionId(交易序號) = (int(50))<br>";
-    echo "參數3:action(轉帳動作) = IN/OUT<br>";
-    echo "參數4:money(轉帳金額) = (int)<br>";
+    $message = array("errorMessage" => "input error!!");
+    echo json_encode($message);
+    exit;
 }
 ?>
